@@ -2,11 +2,26 @@ import {useLoaderData, Link} from '@remix-run/react';
 import {json} from '@shopify/remix-oxygen';
 
 // only on the server
+
 export async function loader({context}) {
-  const {products} = context.storefront.query(ALL_PRODUCTS_QUERY);
+  const {storefront} = context;
+
+  const PRODUCTS_QUERY = `#graphql
+    query Products {
+      products(first: 8) {
+        nodes {
+          id
+          title
+          handle
+        }
+      }
+    }
+  `;
+
+  const {products} = await storefront.query(PRODUCTS_QUERY);
+
   return json({
-    // FIXME: Cannot read properties of undefined (reading 'nodes')
-     products: products.nodes,
+    products: products?.nodes || [],
   });
 }
 
